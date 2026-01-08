@@ -18,29 +18,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# DB + seed + ML
 Base.metadata.create_all(bind=engine)
 seed()
 train()
 
-# Serve frontend static files from frontend
-# app.mount("/static", StaticFiles(directory="static"), name="static")
+# ---------------- API ROUTES ----------------
 
-# For render
-from fastapi.staticfiles import StaticFiles
-
-app.mount(
-    "/", 
-    StaticFiles(directory="static", html=True), 
-    name="frontend"
-)
-
-@app.get("/")
-def serve_frontend():
-    return FileResponse("static/index.html")
-
-# ---------- API ROUTES ----------
-
-@app.post("/login")
+@app.post("/api/login")
 def login(card_number: str, pin: str):
     db = SessionLocal()
     user = db.query(User).filter_by(card_number=card_number, pin=pin).first()
@@ -48,7 +33,7 @@ def login(card_number: str, pin: str):
         return {"success": False}
     return {"success": True, "balance": user.balance}
 
-@app.post("/withdraw")
+@app.post("/api/withdraw")
 def withdraw(card_number: str, amount: float):
     db = SessionLocal()
     user = db.query(User).filter_by(card_number=card_number).first()
@@ -63,7 +48,7 @@ def withdraw(card_number: str, amount: float):
     db.commit()
     return {"status": "success", "balance": user.balance}
 
-@app.post("/deposit")
+@app.post("/api/deposit")
 def deposit(card_number: str, amount: float):
     db = SessionLocal()
     user = db.query(User).filter_by(card_number=card_number).first()
@@ -71,6 +56,14 @@ def deposit(card_number: str, amount: float):
     db.commit()
     return {"status": "success", "balance": user.balance}
 
-@app.get("/assistant")
+@app.get("/api/assistant")
 def assistant(msg: str):
     return {"reply": respond(msg)}
+
+# ---------------- FRONTEND ----------------
+
+app.mount(
+    "/", 
+    StaticFiles(directory="static", html=True), 
+    name="frontend"
+)
