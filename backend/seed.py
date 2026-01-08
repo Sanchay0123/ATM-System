@@ -1,20 +1,19 @@
-from database import SessionLocal, engine
-from models import User, Base
-
-Base.metadata.create_all(bind=engine)
-db = SessionLocal()
+from database import SessionLocal
+from models import User
 
 def seed():
-    if db.query(User).count() == 0:
-        user = User(
+    db = SessionLocal()
+
+    user = db.query(User).filter_by(card_number="1234567890").first()
+
+    if not user:
+        demo_user = User(
             card_number="1234567890",
             pin="1234",
             balance=10000.0
         )
-        db.add(user)
+        db.add(demo_user)
         db.commit()
-        print("✅ Seed user created")
+        print("✅ Demo user created")
     else:
-        print("ℹ️ Users already exist")
-
-seed()
+        print("ℹ️ Demo user already exists")
