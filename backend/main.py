@@ -22,8 +22,17 @@ Base.metadata.create_all(bind=engine)
 seed()
 train()
 
-# Serve frontend static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Serve frontend static files from frontend
+# app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# For render
+from fastapi.staticfiles import StaticFiles
+
+app.mount(
+    "/", 
+    StaticFiles(directory="static", html=True), 
+    name="frontend"
+)
 
 @app.get("/")
 def serve_frontend():
